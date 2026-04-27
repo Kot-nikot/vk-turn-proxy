@@ -23,19 +23,34 @@ import (
 
 const captchaListenPort = "8765"
 
+func getLocalIP() string {  
+	addrs, err := net.InterfaceAddrs()  
+	if err != nil {  
+		return "localhost"  
+	}  
+	for _, addr := range addrs {  
+		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {  
+			if ipnet.IP.To4() != nil {  
+				return ipnet.IP.String()  
+			}  
+		}  
+	}  
+	return "localhost"  
+}
+
 type browserCommand struct {
 	name string
 	args []string
 }
 
 func localCaptchaOrigin() string {
-	return "http://localhost:" + captchaListenPort
+    return "http://" + getLocalIP() + ":" + captchaListenPort
 }
 
 func localCaptchaListenAddrs() []string {
 	return []string{
-		"127.0.0.1:" + captchaListenPort,
-		"[::1]:" + captchaListenPort,
+		"0.0.0.0:" + captchaListenPort,
+		"[::]:" + captchaListenPort,
 	}
 }
 
@@ -44,6 +59,7 @@ func localCaptchaHosts() []string {
 		"localhost:" + captchaListenPort,
 		"127.0.0.1:" + captchaListenPort,
 		"[::1]:" + captchaListenPort,
+		getLocalIP() + ":" + captchaListenPort,
 	}
 }
 
@@ -59,7 +75,7 @@ func isLocalCaptchaHost(host string) bool {
 func localCaptchaURLForTarget(targetURL *neturl.URL) string {
 	localURL := &neturl.URL{
 		Scheme:   "http",
-		Host:     "localhost:" + captchaListenPort,
+		Host:    getLocalIP() + ":" + captchaListenPort,
 		Path:     targetURL.Path,
 		RawPath:  targetURL.RawPath,
 		RawQuery: targetURL.RawQuery,
