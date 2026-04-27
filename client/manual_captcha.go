@@ -465,6 +465,10 @@ func solveCaptchaViaProxy(redirectURI string, dialer *dnsdialer.Dialer) (string,
 			_, _ = fmt.Fprintf(w, `<!DOCTYPE html><html><body style="font-family:sans-serif;padding:20px"><h2>Captcha proxy error</h2><p>%s %s</p><p>%v</p></body></html>`, r.Method, r.URL.String(), err)
 		},
 		ModifyResponse: func(res *http.Response) error {
+			res.Header.Set("Access-Control-Allow-Origin", "*")  
+            res.Header.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")  
+            res.Header.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")  
+      
 			rewriteProxyCookies(res.Header)
 
 			if res.StatusCode >= 300 && res.StatusCode < 400 {
@@ -551,6 +555,10 @@ func solveCaptchaViaProxy(redirectURI string, dialer *dnsdialer.Dialer) (string,
 	})
 
 	mux.HandleFunc("/generic_proxy", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")  
+        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")  
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type")  
+      
 		targetAuthURL := r.URL.Query().Get("proxy_url")
 		targetParsed, err := neturl.Parse(targetAuthURL)
 		if err != nil || targetParsed.Host == "" {
