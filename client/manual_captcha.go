@@ -184,12 +184,16 @@ func rewriteCaptchaHTML(html string, targetURL *neturl.URL) string {
 	localOrigin := localCaptchaOrigin()
 	upstreamOrigin := targetOrigin(targetURL)
 	html = strings.ReplaceAll(html, upstreamOrigin, localOrigin)
+
+	cspMeta := `<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">`  
+    html = strings.Replace(html, "<head>", "<head>"+cspMeta, 1) 
 	
 	 manifestInterceptor := `  
 <script>  
 (function() {  
     var origFetch = window.fetch;  
-    window.fetch = function() {  
+    window.fetch = function() {
+	    var url = arguments[0]
         var url = arguments[0];  
         var urlStr = typeof url === 'object' && url.url ? url.url : url;  
           
