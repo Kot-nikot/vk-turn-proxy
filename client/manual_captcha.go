@@ -184,6 +184,25 @@ func rewriteCaptchaHTML(html string, targetURL *neturl.URL) string {
 	localOrigin := localCaptchaOrigin()
 	upstreamOrigin := targetOrigin(targetURL)
 	html = strings.ReplaceAll(html, upstreamOrigin, localOrigin)
+	
+	 manifestInterceptor := `  
+<script>  
+(function() {  
+    var origFetch = window.fetch;  
+    window.fetch = function() {  
+        var url = arguments[0];  
+        var urlStr = typeof url === 'object' && url.url ? url.url : url;  
+          
+        if (typeof urlStr === 'string' && urlStr.includes('manifest.json')) {  
+            arguments[0] = '/generic_proxy?proxy_url=' + encodeURIComponent(urlStr);  
+        }  
+          
+        return origFetch.apply(this, arguments);  
+    };  
+})();  
+</script>`  
+      
+    html = strings.Replace(html, "</head>", manifestInterceptor+"</head>", 1) 					 
 
 	script := fmt.Sprintf(`
 <script>
