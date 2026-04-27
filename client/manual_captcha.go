@@ -223,7 +223,7 @@ func rewriteCaptchaHTML(html string, targetURL *neturl.URL) string {
 
     function handleSuccessToken(token) {
         if (!token) return;
-        fetch('/local-captcha-result', {
+        fetch(localOrigin + '/local-captcha-result', {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: 'token=' + encodeURIComponent(token)
